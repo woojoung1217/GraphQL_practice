@@ -1,22 +1,38 @@
 import { ApolloServer, gql } from "apollo-server";
 
-const tweets = [
+let tweets = [
   {
     id: "1",
     text: "first one",
+    userId: "2",
   },
   {
     id: "2",
     text: "second one",
+    userId: "1",
+  },
+];
+//  trash data
+
+let users = [
+  {
+    id: "1",
+    firstName: "nico",
+    lastName: "las",
+  },
+  {
+    id: "2",
+    firstName: "yoon",
+    lastName: "woojoung",
   },
 ];
 
 const typeDefs = gql`
   type User {
-    id: ID
-    username: String!
+    id: ID!
     firstName: String!
     lastName: String!
+    fullName: String!
   }
   type Tweet {
     id: ID!
@@ -24,6 +40,7 @@ const typeDefs = gql`
     author: User
   }
   type Query {
+    allUsers: [User!]!
     allTweets: [Tweet!]!
     tweet(id: ID!): Tweet
   }
@@ -41,12 +58,16 @@ const resolvers = {
     tweet(root, { id }) {
       return tweets.find((tweet) => tweet.id === id);
     },
+    allUsers() {
+      return user;
+    },
   },
   Mutation: {
     postTweet(_, { text, userId }) {
       const newTweet = {
-        id: String(tweets.length + 1), // ID는 String 또는 ID 타입으로 변환해야 합니다.
+        id: String(tweets.length + 1),
         text,
+        userId,
       };
       tweets.push(newTweet);
       return newTweet;
@@ -58,6 +79,16 @@ const resolvers = {
         return true;
       }
       return false;
+    },
+  },
+  User: {
+    fullName({ firstName, lastName }) {
+      return `${firstName} ${lastName}`;
+    },
+  },
+  Tweet: {
+    author({ userId }) {
+      return users.find((user) => user.id === userId);
     },
   },
 };
